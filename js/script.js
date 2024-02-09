@@ -1,64 +1,45 @@
-var map = L.map('map').setView([41.377818, 2.185593], 13);
+//Agafa el JSON de meteorits
+fetch("js/data/earthMeteorites.json")
+  .then((response) => response.json())
+  .then((data) => {
+    var barcelonaCoords = [41.3851, 2.1734];
+    var map = L.map('map').setView(barcelonaCoords, 2);
+    //Afegira la llibreria de leaflet
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    //Es afegira l'icona dela ubicació de Barcelona
+    var barcelonaIcon = L.icon({
+      iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    //Coordenades de Barcelona, Glories
+    L.marker(barcelonaCoords, {icon: barcelonaIcon}).addTo(map).bindPopup('Barcelona, Glories');
+    //Recopilara tots els meteorits i ho convertira en icona
+    data.forEach(function(meteorito) {
+      var meteoritoIcon = L.icon({
+        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+      //Marca per els meteorits
+      var marker = L.marker([meteorito.reclat, meteorito.reclong], {icon: meteoritoIcon}).addTo(map);
+      
+      var popupContent = "<b>Name:</b> " + meteorito.name + "<br>" +
+                         "<b>ID:</b> " + meteorito.id + "<br>" +
+                         "<b>Nametype:</b> " + meteorito.nametype + "<br>" +
+                         "<b>Mass:</b> " + meteorito.mass + "<br>" +
+                         "<b>Fall:</b> " + meteorito.fall + "<br>" +
+                         "<b>Year:</b> " + meteorito.year + "<br>" +
+                         "<b>Reclat:</b> " + meteorito.reclat + "<br>" +
+                         "<b>Reclong:</b> " + meteorito.reclong + "<br>" +
+                         "<b>Geolocation:</b> " + JSON.stringify(meteorito.geolocation);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
-
-var marker = L.marker([51.5, -0.09]).addTo(map);
-
-var circle = L.circle([51.508, -0.11], {
-    color: 'red',
-    fillColor: '#f03',
-    fillOpacity: 0.5,
-    radius: 500
-}).addTo(map);
-
-var polygon = L.polygon([
-    [51.509, -0.08],
-    [51.503, -0.06],
-    [51.51, -0.047]
-]).addTo(map);
-
-marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-circle.bindPopup("I am a circle.");
-polygon.bindPopup("I am a polygon.");
-
-var popup = L.popup()
-    .setLatLng([51.513, -0.09])
-    .setContent("I am a standalone popup.")
-    .openOn(map);
-
-    function onMapClick(e) {
-        alert("You clicked the map at " + e.latlng);
-    }
-    
-    map.on('click', onMapClick);
-
-    var popup = L.popup();
-
-    function onMapClick(e) {
-        popup
-            .setLatLng(e.latlng)
-            .setContent("You clicked the map at " + e.latlng.toString())
-            .openOn(map);
-    }
-    
-    map.on('click', onMapClick);
-
-    function printList(meteorites) {    
-        fetch("js/data/earthMeteorites.json")
-        .then((response) => response.json())
-        .then((data) => {
-            earthMeteoritesData = data;
-        });
-        var meteoritesList = document.getElementById('meteorits-list');
-        meteorites.forEach((meteorite, index) => {
-            var button = document.createElement('button');
-            button.textContent = 'Meteorit ' + (index + 1);
-            button.addEventListener('click', function() {
-                map.setView([parseFloat(meteorite.reclat), parseFloat(meteorite.reclong)], 5); // Centra el mapa en la nueva ubicación del marcador con un zoom de 5.
-            });
-            meteoritesList.appendChild(button);
-        });
-    }
+      marker.bindPopup(popupContent); 
+    });
+  });
